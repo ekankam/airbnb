@@ -2,8 +2,9 @@ import { useRouter } from 'next/dist/client/router'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { format } from 'date-fns'
+import InfoCard from '../components/InfoCard'
 
-const Search = () => {
+const Search = ({ searchResults }) => {
     const router = useRouter()
     const { location, startDate, endDate, numberOfGuests } = router.query
 
@@ -12,7 +13,9 @@ const Search = () => {
     const range = `${formattedStartDate} - ${formattedEndDate}`
     return (
         <div>
-            <Header />
+            <Header
+                placeholder={`${location} | ${range} | ${numberOfGuests} guests`}
+            />
             <main className="flex">
                 <section className="flex-grow pt-14 px-6">
                     <p className="text-xs">
@@ -29,6 +32,30 @@ const Search = () => {
                         <p className="button">Rooms and Beds</p>
                         <p className="button">More filters</p>
                     </div>
+                    <div className="flex flex-col">
+                        {searchResults?.map(
+                            ({
+                                img,
+                                location,
+                                title,
+                                description,
+                                star,
+                                price,
+                                total,
+                            }) => (
+                                <InfoCard
+                                    key={img}
+                                    img={img}
+                                    location={location}
+                                    title={title}
+                                    description={description}
+                                    star={star}
+                                    price={price}
+                                    total={total}
+                                />
+                            )
+                        )}
+                    </div>
                 </section>
             </main>
             <Footer />
@@ -37,3 +64,14 @@ const Search = () => {
 }
 
 export default Search
+
+export async function getServerSideProps() {
+    const data = await fetch('https://links.papareact.com/isz')
+    const searchResults = await data.json()
+
+    return {
+        props: {
+            searchResults,
+        },
+    }
+}
